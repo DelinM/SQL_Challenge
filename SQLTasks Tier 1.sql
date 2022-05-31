@@ -39,6 +39,9 @@ WHERE  membercost <> 0.0
 
 
 /* Q2: How many facilities do not charge a fee to members? */
+SELECT COUNT(name) FROM Facilities
+WHERE  membercost =0
+
 
 
 /* Q3: Write an SQL query to show a list of facilities that charge a fee to members,
@@ -46,19 +49,40 @@ where the fee is less than 20% of the facility's monthly maintenance cost.
 Return the facid, facility name, member cost, and monthly maintenance of the
 facilities in question. */
 
+SELECT facid, name, membercost, monthlymaintenance
+FROM Facilities
+WHERE membercost  < monthlymaintenance * 0.2
+AND membercost > 0
+
+
 
 /* Q4: Write an SQL query to retrieve the details of facilities with ID 1 and 5.
 Try writing the query without using the OR operator. */
+SELECT * 
+FROM Facilities
+WHERE facid in (1, 5)
+
 
 
 /* Q5: Produce a list of facilities, with each labelled as
 'cheap' or 'expensive', depending on if their monthly maintenance cost is
 more than $100. Return the name and monthly maintenance of the facilities
 in question. */
+SELECT name, monthlymaintenance,
+	   CASE WHEN monthlymaintenance > 100 THEN 'expensive'
+   			WHEN monthlymaintenance <= 100 THEN 'cheap'
+		END AS label
+FROM Facilities
+ORDER BY monthlymaintenance DESC
+
 
 
 /* Q6: You'd like to get the first and last name of the last member(s)
 who signed up. Try not to use the LIMIT clause for your solution. */
+SELECT firstname, surname
+FROM Members
+WHERE memid = (SELECT MAX(memid) FROM Members)
+
 
 
 /* Q7: Produce a list of all members who have used a tennis court.
