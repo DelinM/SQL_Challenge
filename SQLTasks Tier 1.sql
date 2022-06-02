@@ -100,6 +100,7 @@ INNER JOIN Bookings AS b ON m.memid = b.memid
 INNER JOIN Facilities AS f ON f.facid = b.facid
 WHERE f.name LIKE "Tennis Court%"
 GROUP BY m.memid) as final
+WHERE first_name <> 'GUEST'
 
 
 
@@ -112,7 +113,56 @@ facility, the name of the member formatted as a single column, and the cost.
 Order by descending cost, and do not use any subqueries. */
 
 
+SELECT f.name, 
+	   CONCAT_WS(' ', m.firstname, m.surname) AS memeber_name,
+       CASE WHEN b.memid = 0 THEN b.slots * f.guestcost
+			ELSE b.slots * f.membercost
+  			END AS cost
+FROM Bookings AS b
+INNER JOIN Facilities as f
+ON f.facid = b.facid
+INNER JOIN Members as m
+ON b.memid = m.memid
+WHERE starttime LIKE '2012-09-14%'
+	  AND CASE WHEN b.memid = 0 THEN b.slots * f.guestcost
+			ELSE b.slots * f.membercost
+  			END > 30
+
 /* Q9: This time, produce the same result as in Q8, but using a subquery. */
+
+WITH Bookings_modified AS(
+	SELECT b.facid, 
+           b.memid, 
+           b.slots, 
+           CONCAT_WS(' ', m.firstname, m.surname) AS memeber_name
+    FROM Bookings as b
+    INNER JOIN Members AS m
+    ON b.memid = m.memid
+    WHERE b.starttime LIKE '2012-09-14%'
+),
+
+Facilities_Modified AS(
+	SELECT facid, name,guestcost, membercost
+    FROM Facilities)
+
+SELECT facility_name, member_name, total_cost
+FROM (
+	SELECT f.name AS facility_name,
+    	   b.memeber_name AS memeber_name,
+           CASE WHEN b.memid = 0 THEN b.slots * f.guestcost
+			    ELSE b.slots * f.membercost AS total_cost
+    FROM Bookings_modified as b
+    INNER JOIN Facilities_Modified as f
+    ON b.facid = f.facid
+)
+
+WHERE total_cost > 30
+
+
+
+
+
+
 
 
 /* PART 2: SQLite
