@@ -58,6 +58,7 @@ AND membercost > 0
 
 /* Q4: Write an SQL query to retrieve the details of facilities with ID 1 and 5.
 Try writing the query without using the OR operator. */
+
 SELECT * 
 FROM Facilities
 WHERE facid in (1, 5)
@@ -68,6 +69,7 @@ WHERE facid in (1, 5)
 'cheap' or 'expensive', depending on if their monthly maintenance cost is
 more than $100. Return the name and monthly maintenance of the facilities
 in question. */
+
 SELECT name, monthlymaintenance,
 	   CASE WHEN monthlymaintenance > 100 THEN 'expensive'
    			WHEN monthlymaintenance <= 100 THEN 'cheap'
@@ -79,6 +81,7 @@ ORDER BY monthlymaintenance DESC
 
 /* Q6: You'd like to get the first and last name of the last member(s)
 who signed up. Try not to use the LIMIT clause for your solution. */
+
 SELECT firstname, surname
 FROM Members
 WHERE memid = (SELECT MAX(memid) FROM Members)
@@ -89,6 +92,16 @@ WHERE memid = (SELECT MAX(memid) FROM Members)
 Include in your output the name of the court, and the name of the member
 formatted as a single column. Ensure no duplicate data, and order by
 the member name. */
+
+SELECT CONCAT_WS(' ', first_name, sur_name) AS member_name
+FROM ( SELECT m.memid, m.firstname AS first_name, m.surname AS sur_name, f.facid, f.name
+FROM Members AS m
+INNER JOIN Bookings AS b ON m.memid = b.memid
+INNER JOIN Facilities AS f ON f.facid = b.facid
+WHERE f.name LIKE "Tennis Court%"
+GROUP BY m.memid) as final
+
+
 
 
 /* Q8: Produce a list of bookings on the day of 2012-09-14 which
