@@ -130,36 +130,21 @@ WHERE starttime LIKE '2012-09-14%'
 
 /* Q9: This time, produce the same result as in Q8, but using a subquery. */
 
-WITH Bookings_modified AS(
-	SELECT b.facid, 
-           b.memid, 
-           b.slots, 
-           CONCAT_WS(' ', m.firstname, m.surname) AS memeber_name
-    FROM Bookings as b
-    INNER JOIN Members AS m
-    ON b.memid = m.memid
-    WHERE b.starttime LIKE '2012-09-14%'
-),
-
-Facilities_Modified AS(
-	SELECT facid, name,guestcost, membercost
-    FROM Facilities)
-
-SELECT facility_name, member_name, total_cost
+SELECT x.facility_name, x.member_name, x.cost
 FROM (
-	SELECT f.name AS facility_name,
-    	   b.memeber_name AS memeber_name,
+	SELECT f.name as facility_name,
+    	   CONCAT_WS(' ', m.firstname, m.surname) AS member_name,
+    	   b.starttime AS starttime,
            CASE WHEN b.memid = 0 THEN b.slots * f.guestcost
-			    ELSE b.slots * f.membercost AS total_cost
-    FROM Bookings_modified as b
-    INNER JOIN Facilities_Modified as f
+		   ELSE b.slots * f.membercost
+  		   END AS cost
+    FROM Bookings AS b
+    LEFT JOIN Facilities AS f
     ON b.facid = f.facid
-)
-
-WHERE total_cost > 30
-
-
-
+    LEFT JOIN Members AS m
+    ON b.memid = m.memid
+) AS x
+WHERE x.starttime LIKE '2012-09-14%' AND cost > 30
 
 
 
